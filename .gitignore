@@ -45,3 +45,5 @@ temp/
 .credentials.json
 secrets.json
 .auth/
+
+.vercel
