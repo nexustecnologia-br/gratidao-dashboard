@@ -554,8 +554,121 @@
             });
         }
 
-        function viewStartup(id) {
-            alert(`Ver detalhes da startup: ${id}\n\n(Em construção)`);
+        // Visualizar detalhes da Startup
+        async function viewStartup(id) {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/gratidao_startups?id=eq.${id}`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+
+                if (!response.ok) throw new Error('Erro ao carregar startup');
+
+                const startups = await response.json();
+                if (startups.length === 0) {
+                    alert('Startup não encontrada');
+                    return;
+                }
+
+                const startup = startups[0];
+
+                // Carregar regras de memória
+                const memoriaResponse = await fetch(`${SUPABASE_URL}/rest/v1/gratidao_memoria_aprendizado?startup_id=eq.${id}`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+
+                const memorias = memoriaResponse.ok ? await memoriaResponse.json() : [];
+
+                // Mostrar modal com detalhes
+                const modal = document.createElement('div');
+                modal.className = 'modal active';
+                modal.innerHTML = `
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 w-full max-w-2xl neon-border max-h-[80vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-white">${startup.nome}</h2>
+                            <button onclick="this.closest('.modal').remove()" class="text-gray-400 hover:text-white">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+
+                        <div class="mb-6">
+                            <p class="text-sm text-gray-400 mb-2">Estado Atual:</p>
+                            <p class="text-lg font-bold neon-glow">${formatEstado(startup.estado)}</p>
+                        </div>
+
+                        ${memorias.length > 0 ? `
+                            <div class="mb-6 border-t border-gray-700 pt-4">
+                                <h3 class="font-bold text-green-400 mb-3">⚡ Regras de Ouro (Memória)</h3>
+                                ${memorias.map(m => `
+                                    <div class="bg-slate-950/50 border-l-3 border-yellow-500 p-3 mb-2 rounded">
+                                        <p class="text-sm font-semibold text-yellow-300">${m.tipo_tarefa}</p>
+                                        <p class="text-xs text-gray-300 mt-1">${m.regra_de_ouro}</p>
+                                        <p class="text-xs text-gray-500 mt-1">Prioridade: ${m.prioridade}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+
+                        <div class="flex gap-3 mt-6">
+                            <button onclick="avancarFase('${id}', '${startup.estado}')" class="flex-1 neon-button">
+                                <i class="fas fa-arrow-up mr-2"></i>Avançar Fase
+                            </button>
+                            <button onclick="this.closest('.modal').remove()" class="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white">
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modal);
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) this.remove();
+                });
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao carregar detalhes da startup');
+            }
+        }
+
+        // Avançar fase da Startup
+        async function avancarFase(id, estadoAtual) {
+            const faseMap = {
+                'IDEIA_RECEBIDA': 'CANVAS_GERADO',
+                'CANVAS_GERADO': 'FASE_1_VALIDACAO',
+                'FASE_1_VALIDACAO': 'FASE_2_SHARE',
+                'FASE_2_SHARE': 'FASE_3_RETENCAO',
+                'FASE_3_RETENCAO': 'FASE_4_TRAFEGO',
+                'FASE_4_TRAFEGO': 'FASE_5_CONVERSAO',
+                'FASE_5_CONVERSAO': 'FASE_6_ESCALA'
+            };
+
+            const novoEstado = faseMap[estadoAtual];
+            if (!novoEstado) {
+                alert('⚠️ Esta startup já completou todas as fases!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/gratidao_startups?id=eq.${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({ estado: novoEstado })
+                });
+
+                if (response.ok) {
+                    alert(`✅ Startup avançou para: ${formatEstado(novoEstado)}`);
+                    document.querySelectorAll('.modal.active').forEach(m => m.remove());
+                    loadStartups();
+                } else {
+                    alert('❌ Erro ao atualizar startup');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao avançar fase');
+            }
         }
 
         // Carregar dados ao iniciar
