@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRATIDÃO - Console de Operações</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #000000; color: #ffffff; }
+        .border-custom { border-color: #ffffff; }
+        .text-success { color: #00ff00; }
+        .bg-success { background-color: #00ff00; color: #000000; }
+        .text-danger { color: #ff0000; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #ffffff; }
+    </style>
+</head>
+<body class="p-6 font-mono text-sm">
+
+    <header class="border-b-2 border-custom pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold tracking-widest text-success">⚡ GRATIDÃO ENGINE v1.1</h1>
+            <p class="text-xs text-gray-400 mt-1">Segundo Cérebro Operacional • Gestão Baseada no Manifesto SeatZero</p>
+        </div>
+        <div class="border border-custom p-2 text-center bg-zinc-900">
+            <span class="text-xs block text-gray-400">STATUS SUPERVISOR</span>
+            <span class="text-xs font-bold text-success">● MOCK SIMULADO ATIVO</span>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <div class="lg:col-span-4 space-y-6">
+            
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-success">// INJETAR NOVA STARTUP</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Nome da Startup:</label>
+                        <input type="text" id="newNome" placeholder="Ex: SeatZero-Estadios" class="w-full bg-black text-white border border-custom p-2 focus:outline-none focus:border-success">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Ideia Bruta / Narrativa:</label>
+                        <textarea id="newIdeia" rows="3" placeholder="Descreva o conceito..." class="w-full bg-black text-white border border-custom p-2 focus:outline-none focus:border-success"></textarea>
+                    </div>
+                    <button onclick="adicionarStartupMock()" class="w-full bg-success text-black font-bold p-2 text-xs uppercase tracking-wider hover:bg-black hover:text-success border hover:border-success transition-all">
+                        Adicionar ao Pipeline
+                    </button>
+                </div>
+            </div>
+
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-success">// PIPELINE ATIVO</h2>
+                <select id="startupSelect" class="w-full bg-black text-white border border-custom p-2 focus:outline-none focus:border-success mb-4" onchange="selecionarStartup()">
+                    </select>
+                
+                <div id="metaPainel" class="space-y-3 border-t border-dashed border-custom pt-4">
+                    <div>
+                        <span class="text-xs text-gray-400 block">ESTADO ATUAL:</span>
+                        <span id="lblEstado" class="text-base font-bold text-success">---</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 block">CICLOS DE SUPERVISÃO:</span>
+                        <span id="lblCiclos" class="font-bold">0</span>
+                    </div>
+                    <div class="pt-2">
+                        <button onclick="avancarFaseMock()" class="w-full bg-black text-white border border-custom hover:border-success hover:text-success p-2 font-bold text-xs tracking-wider transition-all">
+                            ⏩ FORÇAR AVANÇO DE FASE
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-6">
+            
+            <div class="border-2 border-custom p-4 bg-black">
+                <div class="flex justify-between items-center mb-4 border-b border-custom pb-2">
+                    <h2 class="text-base font-bold text-success">// MANIFESTO SEATZERO — CHECKLIST</h2>
+                    <span id="progressoContagem" class="text-xs px-2 py-1 border border-custom text-white font-bold">0/0 OK</span>
+                </div>
+                <div id="checklistContainer" class="space-y-2 max-h-[350px] overflow-y-auto pr-2">
+                    </div>
+            </div>
+
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-danger">// MEMÓRIA VITALÍCIA (ANTI-RETRABALHO DA IA)</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-custom text-xs text-gray-400">
+                                <th class="pb-2 font-bold">Tarefa / Escopo</th>
+                                <th class="pb-2 font-bold">Regra de Ouro Consolidada</th>
+                                <th class="pb-2 font-bold text-center">Prioridade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-zinc-800 text-xs">
+                                <td class="py-3 pr-2 text-white font-bold">Validação de Mercado</td>
+                                <td class="py-3 pr-2 text-gray-300 italic">"Proibir barateamento de ticket em MVP para tentar forçar tração artificial. Se o usuário não pagar o valor cheio de entrada, a narrativa está fraca."</td>
+                                <td class="py-3 text-center text-danger font-bold">3</td>
+                            </tr>
+                            <tr class="border-b border-zinc-800 text-xs">
+                                <td class="py-3 pr-2 text-white font-bold">Arquitetura n8n</td>
+                                <td class="py-3 pr-2 text-gray-300 italic">"Sempre criar fallbacks de timeout para requisições de API de mensageria para evitar travamento de filas de conciliação simultâneas."</td>
+                                <td class="py-3 text-center text-white">2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const FASES = ['FASE_1_VALIDACAO', 'FASE_2_SHARE', 'FASE_3_RETENCAO', 'FASE_4_TRAFEGO', 'FASE_5_CONVERSAO', 'FASE_6_ESCALA'];
+        
+        let startups = [
+            { id: "1", nome: "PixConcilia-MVP", ideia: "Sistema de conciliação automatizada de Pix com alertas em WhatsApp.", estado: "FASE_1_VALIDACAO", ciclos: 12 },
+            { id: "2", nome: "Aula-Online-Plataforma", ideia: "SaaS para professores monetizarem cursos online.", estado: "FASE_1_VALIDACAO", ciclos: 5 }
+        ];
+
+        let checklistBase = [
+            { id: "c1", item: "Comprar domínio", categoria: "Fase 1", concluido: true },
+            { id: "c2", item: "Criar landing page", categoria: "Fase 1", concluido: true },
+            { id: "c3", item: "Criar headline forte", categoria: "Fase 1", concluido: false },
+            { id: "c4", item: "Criar CTA principal", categoria: "Fase 1", concluido: false },
+            { id: "c5", item: "Integrar Stripe", categoria: "Fase 1", concluido: false },
+            { id: "c6", item: "Criar checkout simples", categoria: "Fase 1", concluido: false }
+        ];
+
+        let idSelecionado = "1";
+
+        function renderStartups() {
+            const select = document.getElementById('startupSelect');
+            select.innerHTML = '';
+            startups.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.nome} [${s.estado}]`;
+                if(s.id === idSelecionado) opt.selected = true;
+                select.appendChild(opt);
+            });
+            atualizarCardMetadados();
+        }
+
+        function atualizarCardMetadados() {
+            const atual = startups.find(s => s.id === idSelecionado);
+            if(atual) {
+                document.getElementById('lblEstado').textContent = atual.estado;
+                document.getElementById('lblCiclos').textContent = atual.ciclos + " ciclos processados";
+            }
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('checklistContainer');
+            container.innerHTML = '';
+            let concluidos = 0;
+
+            checklistBase.forEach(item => {
+                if(item.concluido) concluidos++;
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-2.5 border ${item.concluido ? 'border-success bg-zinc-900/40' : 'border-custom'}`;
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" ${item.concluido ? 'checked' : ''} class="w-4 h-4 accent-green-500 cursor-pointer" onchange="alternarCheck('${item.id}')">
+                        <span class="${item.concluido ? 'line-through text-gray-500' : 'text-white'}">${item.item}</span>
+                    </div>
+                    <span class="text-[10px] px-2 py-0.5 border border-custom text-gray-400 font-bold uppercase">${item.categoria}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('progressoContagem').textContent = `${concluidos}/${checklistBase.length} OK`;
+        }
+
+        function alternarCheck(id) {
+            const item = checklistBase.find(c => c.id === id);
+            if(item) item.concluido = !item.concluido;
+            renderChecklist();
+        }
+
+        function selecionarStartup() {
+            idSelecionado = document.getElementById('startupSelect').value;
+            atualizarCardMetadados();
+        }
+
+        function adicionarStartupMock() {
+            const nome = document.getElementById('newNome').value.trim();
+            const ideia = document.getElementById('newIdeia').value.trim();
+            if(!nome || !ideia) return alert('Preencha os campos.');
+
+            const novo = { id: Date.now().toString(), nome: nome, ideia: ideia, estado: "FASE_1_VALIDACAO", ciclos: 0 };
+            startups.unshift(novo);
+            idSelecionado = novo.id;
+            
+            document.getElementById('newNome').value = '';
+            document.getElementById('newIdeia').value = '';
+            
+            renderStartups();
+        }
+
+        function avancarFaseMock() {
+            const atual = startups.find(s => s.

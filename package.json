@@ -1,0 +1,24 @@
+{
+  "name": "gratidao-dashboard",
+  "version": "1.0.0",
+  "description": "Gratidão v1.1 - Fábrica de Startups com IA",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python -m http.server 3000 --directory .",
+    "build": "echo 'Não requer build - arquivos estáticos'",
+    "start": "python -m http.server 8080 --directory ."
+  },
+  "keywords": [
+    "startup",
+    "gratidao",
+    "seatzero",
+    "dashboard",
+    "ia"
+  ],
+  "author": "Rodrigo Paes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seu-usuario/gratidao-dashboard.git"
+  }
+}

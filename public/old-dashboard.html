@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRATIDÃO - Console de Operações</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #000000; color: #ffffff; }
+        .border-custom { border-color: #ffffff; }
+        .text-success { color: #00ff00; }
+        .bg-success { background-color: #00ff00; color: #000000; }
+        .text-danger { color: #ff0000; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #ffffff; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="p-6 font-mono text-sm">
+
+    <header class="border-b-2 border-custom pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold tracking-widest text-success">⚡ GRATIDÃO ENGINE v1.1</h1>
+            <p class="text-xs text-gray-400 mt-1">Segundo Cérebro Operacional • Gestão de 6 Fases SeatZero</p>
+        </div>
+        <div class="border border-custom p-2 text-center bg-zinc-900">
+            <span class="text-xs block text-gray-400">STATUS SUPERVISOR</span>
+            <span class="text-xs font-bold text-success">● MOCK INTERATIVO</span>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- COLUNA ESQUERDA -->
+        <div class="lg:col-span-4 space-y-6">
+
+            <!-- Adicionar Startup -->
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-success">// INJETAR NOVA STARTUP</h2>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Nome da Startup:</label>
+                        <input type="text" id="newNome" placeholder="Ex: SeatZero-Estadios" class="w-full bg-black text-white border border-custom p-2 focus:outline-none focus:border-success">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Ideia Bruta / Narrativa:</label>
+                        <textarea id="newIdeia" rows="3" placeholder="Descreva o conceito..." class="w-full bg-black text-white border border-custom p-2 focus:outline-none focus:border-success"></textarea>
+                    </div>
+                    <button onclick="adicionarStartupMock()" class="w-full bg-success text-black font-bold p-2 text-xs uppercase tracking-wider hover:bg-black hover:text-success border hover:border-success transition-all">
+                        Adicionar ao Pipeline
+                    </button>
+                </div>
+            </div>
+
+            <!-- Pipeline Ativo -->
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-success">// PIPELINE ATIVO</h2>
+                <select id="startupSelect" class="w-full bg-black text-white border border-custom p-2 focus:outline-none focus:border-success mb-4" onchange="selecionarStartup()">
+                    <option value="">Carregando startups...</option>
+                </select>
+
+                <div id="metaPainel" class="space-y-3 border-t border-dashed border-custom pt-4">
+                    <div>
+                        <span class="text-xs text-gray-400 block">ESTADO ATUAL:</span>
+                        <span id="lblEstado" class="text-base font-bold text-success">---</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 block">CICLOS EXECUTADOS:</span>
+                        <span id="lblCiclos" class="font-bold">0</span>
+                    </div>
+                    <div class="pt-2 space-y-2">
+                        <button onclick="avancarFaseMock()" class="w-full bg-black text-white border border-custom hover:border-success hover:text-success p-2 font-bold text-xs tracking-wider transition-all">
+                            ⏩ FORÇAR AVANÇO DE FASE
+                        </button>
+                        <button onclick="limparStartup()" class="w-full bg-black text-white border border-custom hover:border-danger hover:text-danger p-2 font-bold text-xs tracking-wider transition-all">
+                            🗑 ARQUIVAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-success">// ESTATÍSTICAS</h2>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Total de Startups:</span>
+                        <span class="font-bold" id="lblTotalStartups">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Viáveis:</span>
+                        <span class="font-bold text-success" id="lblViaveis">0</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Rejeitadas:</span>
+                        <span class="font-bold text-danger" id="lblRejeitadas">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="lg:col-span-8 space-y-6">
+
+            <!-- Visualizador de Fases -->
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-success">// PROGRESSO DAS 6 FASES SEATZERO</h2>
+                <div id="fasesContainer" class="space-y-2">
+                    <!-- Preenchido dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Checklist da Fase Atual -->
+            <div class="border-2 border-custom p-4 bg-black">
+                <div class="flex justify-between items-center mb-4 border-b border-custom pb-2">
+                    <h2 class="text-base font-bold text-success">// CHECKLIST DA FASE ATUAL</h2>
+                    <span id="progressoContagem" class="text-xs px-2 py-1 border border-custom text-white font-bold">0/0 OK</span>
+                </div>
+                <div id="checklistContainer" class="space-y-2 max-h-[350px] overflow-y-auto pr-2">
+                    <p class="text-gray-500 italic">Selecione uma startup para ver o checklist</p>
+                </div>
+            </div>
+
+            <!-- Memória Vitalícia -->
+            <div class="border-2 border-custom p-4 bg-black">
+                <h2 class="text-base font-bold mb-4 border-b border-custom pb-2 text-danger">// MEMÓRIA VITALÍCIA (ANTI-RETRABALHO)</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="border-b border-custom text-gray-400">
+                                <th class="pb-2 font-bold pr-2">Tarefa</th>
+                                <th class="pb-2 font-bold pr-2">Regra de Ouro</th>
+                                <th class="pb-2 font-bold text-center w-12">Prioridade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-zinc-800">
+                                <td class="py-3 pr-2 text-white font-bold">Validação Bruta</td>
+                                <td class="py-3 pr-2 text-gray-300 italic">"Nunca barateie o ticket no MVP. Usuário não pagando = narrativa fraca."</td>
+                                <td class="py-3 text-center text-danger font-bold">9</td>
+                            </tr>
+                            <tr class="border-b border-zinc-800">
+                                <td class="py-3 pr-2 text-white font-bold">Compartilhamento</td>
+                                <td class="py-3 pr-2 text-gray-300 italic">"Sempre criar fallback de timeout em API de mensageria para evitar travamento."</td>
+                                <td class="py-3 text-center text-white font-bold">8</td>
+                            </tr>
+                            <tr class="border-b border-zinc-800">
+                                <td class="py-3 pr-2 text-white font-bold">Retenção</td>
+                                <td class="py-3 pr-2 text-gray-300 italic">"Feed ao vivo precisa de timestamp real. Dados antigos desengajam."</td>
+                                <td class="py-3 text-center text-white font-bold">7</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SEATZERO_FASES = {
+            'FASE_1_VALIDACAO': { nome: '1. Validação Bruta', itens: 12, proximaFase: 'FASE_2_SHARE' },
+            'FASE_2_SHARE': { nome: '2. Compartilhamento', itens: 8, proximaFase: 'FASE_3_RETENCAO' },
+            'FASE_3_RETENCAO': { nome: '3. Retenção', itens: 7, proximaFase: 'FASE_4_TRAFEGO' },
+            'FASE_4_TRAFEGO': { nome: '4. Distribuição', itens: 9, proximaFase: 'FASE_5_CONVERSAO' },
+            'FASE_5_CONVERSAO': { nome: '5. Otimização', itens: 8, proximaFase: 'FASE_6_ESCALA' },
+            'FASE_6_ESCALA': { nome: '6. Escala', itens: 10, proximaFase: null }
+        };
+
+        let startups = [
+            {
+                id: "1",
+                nome: "PixConcilia-MVP",
+                ideia: "Sistema de conciliação automatizada de Pix com alertas via WhatsApp",
+                estado: "FASE_1_VALIDACAO",
+                ciclos: 12,
+                checklist: [
+                    { id: "c1", item: "Comprar domínio", concluido: true },
+                    { id: "c2", item: "Criar landing page", concluido: true },
+                    { id: "c3", item: "Criar headline forte", concluido: true },
+                    { id: "c4", item: "Criar CTA principal", concluido: true },
+                    { id: "c5", item: "Integrar Stripe", concluido: false },
+                    { id: "c6", item: "Criar checkout simples", concluido: false },
+                    { id: "c7", item: "Criar página confirmação", concluido: false },
+                    { id: "c8", item: "Criar escassez visual", concluido: false },
+                    { id: "c9", item: "Publicar online", concluido: false },
+                    { id: "c10", item: "Testar mobile", concluido: false },
+                    { id: "c11", item: "Configurar analytics", concluido: false },
+                    { id: "c12", item: "Validar métrica de pagamento", concluido: false }
+                ]
+            },
+            {
+                id: "2",
+                nome: "Aula-Online-SaaS",
+                ideia: "Plataforma SaaS para professores monetizarem cursos online",
+                estado: "FASE_1_VALIDACAO",
+                ciclos: 5,
+                checklist: [
+                    { id: "d1", item: "Comprar domínio", concluido: false },
+                    { id: "d2", item: "Criar landing page", concluido: false },
+                    { id: "d3", item: "Criar headline forte", concluido: false },
+                    { id: "d4", item: "Criar CTA principal", concluido: false },
+                    { id: "d5", item: "Integrar Stripe", concluido: false },
+                    { id: "d6", item: "Criar checkout simples", concluido: false },
+                    { id: "d7", item: "Criar página confirmação", concluido: false },
+                    { id: "d8", item: "Criar escassez visual", concluido: false },
+                    { id: "d9", item: "Publicar online", concluido: false },
+                    { id: "d10", item: "Testar mobile", concluido: false },
+                    { id: "d11", item: "Configurar analytics", concluido: false },
+                    { id: "d12", item: "Validar métrica de pagamento", concluido: false }
+                ]
+            }
+        ];
+
+        let idSelecionado = "1";
+
+        function renderStartups() {
+            const select = document.getElementById('startupSelect');
+            select.innerHTML = '';
+            startups.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.id;
+                opt.textContent = `${s.nome} [${SEATZERO_FASES[s.estado].nome}]`;
+                if(s.id === idSelecionado) opt.selected = true;
+                select.appendChild(opt);
+            });
+            atualizarCardMetadados();
+            atualizarEstatisticas();
+            renderFases();
+        }
+
+        function atualizarCardMetadados() {
+            const atual = startups.find(s => s.id === idSelecionado);
+            if(atual) {
+                const faseInfo = SEATZERO_FASES[atual.estado];
+                document.getElementById('lblEstado').textContent = faseInfo ? faseInfo.nome : atual.estado;
+                document.getElementById('lblCiclos').textContent = atual.ciclos + " ciclos";
+                renderChecklist();
+            }
+        }
+
+        function atualizarEstatisticas() {
+            document.getElementById('lblTotalStartups').textContent = startups.length;
+            const viavel = startups.filter(s => s.estado !== 'REJEITADA').length;
+            const rejeitada = startups.filter(s => s.estado === 'REJEITADA').length;
+            document.getElementById('lblViaveis').textContent = viavel;
+            document.getElementById('lblRejeitadas').textContent = rejeitada;
+        }
+
+        function renderFases() {
+            const container = document.getElementById('fasesContainer');
+            container.innerHTML = '';
+
+            Object.keys(SEATZERO_FASES).forEach(faseKey => {
+                const faseInfo = SEATZERO_FASES[faseKey];
+                const atual = startups.find(s => s.id === idSelecionado);
+                const isAtual = atual && atual.estado === faseKey;
+
+                const div = document.createElement('div');
+                div.className = `p-3 border ${isAtual ? 'border-success bg-zinc-900/50' : 'border-custom'} fade-in`;
+
+                const percentual = isAtual ? Math.round((atual.checklist.filter(c => c.concluido).length / faseInfo.itens) * 100) : 0;
+                const barWidth = Math.round((percentual / 100) * 20);
+                const bar = '█'.repeat(barWidth) + '░'.repeat(20 - barWidth);
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold ${isAtual ? 'text-success' : 'text-white'}">${isAtual ? '► ' : '  '}${faseInfo.nome}</span>
+                        <span class="text-xs text-gray-400">${percentual}%</span>
+                    </div>
+                    <div class="text-xs font-mono tracking-tight text-gray-500">[${bar}]</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderChecklist() {
+            const atual = startups.find(s => s.id === idSelecionado);
+            const container = document.getElementById('checklistContainer');
+
+            if(!atual) {
+                container.innerHTML = '<p class="text-gray-500 italic">Selecione uma startup</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            let concluidos = 0;
+
+            atual.checklist.forEach(item => {
+                if(item.concluido) concluidos++;
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-2.5 border ${item.concluido ? 'border-success bg-zinc-900/40' : 'border-custom'} cursor-pointer hover:bg-zinc-900/20 transition-all`;
+                div.onclick = () => alternarCheck(idSelecionado, item.id);
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3 flex-1">
+                        <input type="checkbox" ${item.concluido ? 'checked' : ''} class="w-4 h-4 accent-green-500 cursor-pointer" onchange="event.stopPropagation(); alternarCheck('${idSelecionado}', '${item.id}')">
+                        <span class="${item.concluido ? 'line-through text-gray-500' : 'text-white'}">${item.item}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('progressoContagem').textContent = `${concluidos}/${atual.checklist.length} OK`;
+        }
+
+        function alternarCheck(startupId, itemId) {
+            const startup = startups.find(s => s.id === startupId);
+            if(startup) {
+                const item = startup.checklist.find(c => c.id === itemId);
+                if(item) item.concluido = !item.concluido;
+                renderChecklist();
+                renderFases();
+            }
+        }
+
+        function selecionarStartup() {
+            idSelecionado = document.getElementById('startupSelect').value;
+            atualizarCardMetadados();
+        }
+
+        function adicionarStartupMock() {
+            const nome = document.getElementById('newNome').value.trim();
+            const ideia = document.getElementById('newIdeia').value.trim();
+            if(!nome || !ideia) return alert('Preencha todos os campos!');
+
+            const novoChecklist = Array.from({length: 12}, (_, i) => ({
+                id: `n${Date.now()}_${i}`,
+                item: `Item ${i+1} da Fase 1`,
+                concluido: false
+            }));
+
+            const novo = {
+                id: Date.now().toString(),
+                nome: nome,
+                ideia: ideia,
+                estado: "FASE_1_VALIDACAO",
+                ciclos: 0,
+                checklist: novoChecklist
+            };
+            startups.unshift(novo);
+            idSelecionado = novo.id;
+
+            document.getElementById('newNome').value = '';
+            document.getElementById('newIdeia').value = '';
+
+            renderStartups();
+        }
+
+        function avancarFaseMock() {
+            const atual = startups.find(s => s.id === idSelecionado);
+            if(!atual) return;
+
+            const faseInfo = SEATZERO_FASES[atual.estado];
+            if(!faseInfo || !faseInfo.proximaFase) {
+                alert('⚠️ Startup atingiu a Fase Final (Escala)!');
+                return;
+            }
+
+            if(confirm(`⏩ Forçar transição de [${faseInfo.nome}] para [${SEATZERO_FASES[faseInfo.proximaFase].nome}]?`)) {
+                atual.estado = faseInfo.proximaFase;
+                atual.ciclos++;
+                renderStartups();
+                alert(`✅ Transição concluída! Startup agora está em: ${SEATZERO_FASES[faseInfo.proximaFase].nome}`);
+            }
+        }
+
+        function limparStartup() {
+            if(confirm('🗑 Arquivar esta startup? Esta ação não pode ser desfeita.')) {
+                startups = startups.filter(s => s.id !== idSelecionado);
+                idSelecionado = startups.length > 0 ? startups[0].id : '';
+                renderStartups();
+            }
+        }
+
+        // Inicializar
+        renderStartups();
+    </script>
+</body>
+</html>

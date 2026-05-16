@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gratidão v1.1 - Fábrica de Startups com IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-green: #00ff41;
+            --neon-purple: #b100ff;
+            --dark-bg: #0a0e27;
+            --darker-bg: #050814;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker-bg) 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .neon-border {
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .neon-glow {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .neon-button {
+            background: linear-gradient(135deg, var(--neon-green), #00cc33);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+        }
+
+        .neon-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.6);
+        }
+
+        .phase-card {
+            background: linear-gradient(135deg, rgba(0, 255, 65, 0.05) 0%, rgba(177, 0, 255, 0.05) 100%);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .phase-card:hover {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .phase-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 255, 65, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .phase-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-purple));
+            border-radius: 4px;
+            transition: width 0.4s;
+        }
+
+        .startup-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--neon-green);
+            padding: 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .startup-item:hover {
+            background: rgba(0, 255, 65, 0.1);
+            transform: translateX(4px);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-validacao {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid #3b82f6;
+        }
+
+        .status-compartilhamento {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid #22c55e;
+        }
+
+        .status-retencao {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid #f59e0b;
+        }
+
+        .status-trafego {
+            background: rgba(168, 85, 247, 0.2);
+            color: #d8b4fe;
+            border: 1px solid #a855f7;
+        }
+
+        .status-conversao {
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+            border: 1px solid #ec4899;
+        }
+
+        .status-escala {
+            background: rgba(236, 56, 139, 0.2);
+            color: #ff69b4;
+            border: 1px solid #ec3883;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--neon-green), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 255, 65, 0.3);
+            border-top-color: var(--neon-green);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="border-b border-green-900/30 sticky top-0 z-50 backdrop-blur-md bg-opacity-80" style="background: rgba(10, 14, 39, 0.9);">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-brain text-2xl neon-glow"></i>
+                <div>
+                    <h1 class="text-2xl font-bold gradient-text">Gratidão v1.1</h1>
+                    <p class="text-xs text-gray-400">Fábrica de Startups com IA</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-950/20 rounded-full border border-green-800/30">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-green-400">Sistema Ativo</span>
+                </div>
+                <button class="neon-button" onclick="showCreateModal()">
+                    <i class="fas fa-plus mr-2"></i>Nova Startup
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <!-- Dashboard Overview -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold mb-8 gradient-text">
+                <i class="fas fa-chart-line mr-3"></i>Visão Geral do Sistema
+            </h2>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="phase-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm mb-2">Startups Ativas</p>
+                            <p class="text-3xl font-bold neon-glow" id="activeCount">0</p>
+                        </div>
+                        <i class="fas fa-rocket text-2xl text-blue-500 opacity-50"></i>
+                    </div>
+                </div>
+
+                <div class="phase-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm mb-2">Em Validação</p>
+                            <p class="text-3xl font-bold neon-glow" id="validationCount">0</p>
+                        </div>
+                        <i class="fas fa-check-circle text-2xl text-green-500 opacity-50"></i>
+                    </div>
+                </div>
+
+                <div class="phase-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm mb-2">Progredidas</p>
+                            <p class="text-3xl font-bold neon-glow" id="progressedCount">0</p>
+                        </div>
+                        <i class="fas fa-arrow-trend-up text-2xl text-purple-500 opacity-50"></i>
+                    </div>
+                </div>
+
+                <div class="phase-card">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-gray-400 text-sm mb-2">Rejeitadas</p>
+                            <p class="text-3xl font-bold" style="color: #ff6b6b;" id="rejectedCount">0</p>
+                        </div>
+                        <i class="fas fa-times-circle text-2xl text-red-500 opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Startups List -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 gradient-text">
+                <i class="fas fa-list mr-3"></i>Startups
+            </h2>
+
+            <div class="phase-card p-0 overflow-hidden">
+                <div id="startupsList" class="divide-y divide-green-900/20">
+                    <div class="p-6 text-center text-gray-400">
+                        <div class="spinner mx-auto mb-3"></div>
+                        <p>Carregando startups...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEATZERO Phases Overview -->
+        <section>
+            <h2 class="text-2xl font-bold mb-6 gradient-text">
+                <i class="fas fa-layer-group mr-3"></i>Estrutura SEATZERO (6 Fases)
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Fase 1 -->
+                <div class="phase-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-blue-400">Validação Bruta</h3>
+                        <span class="status-badge status-validacao">Fase 1</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Validar viabilidade da ideia com 12 checkpoints</p>
+                    <div class="phase-progress">
+                        <div class="phase-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">0 / 12 itens</p>
+                </div>
+
+                <!-- Fase 2 -->
+                <div class="phase-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-green-400">Compartilhamento</h3>
+                        <span class="status-badge status-compartilhamento">Fase 2</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Estratégia de compartilhamento e distribuição</p>
+                    <div class="phase-progress">
+                        <div class="phase-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">0 / 8 itens</p>
+                </div>
+
+                <!-- Fase 3 -->
+                <div class="phase-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-yellow-400">Retenção</h3>
+                        <span class="status-badge status-retencao">Fase 3</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Manter usuários engajados e ativos</p>
+                    <div class="phase-progress">
+                        <div class="phase-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">0 / 7 itens</p>
+                </div>
+
+                <!-- Fase 4 -->
+                <div class="phase-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-purple-400">Distribuição</h3>
+                        <span class="status-badge status-trafego">Fase 4</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Escalar tráfego e alcance do produto</p>
+                    <div class="phase-progress">
+                        <div class="phase-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">0 / 9 itens</p>
+                </div>
+
+                <!-- Fase 5 -->
+                <div class="phase-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-pink-400">Otimização</h3>
+                        <span class="status-badge status-conversao">Fase 5</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Otimizar conversão e monetização</p>
+                    <div class="phase-progress">
+                        <div class="phase-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">0 / 8 itens</p>
+                </div>
+
+                <!-- Fase 6 -->
+                <div class="phase-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-lg text-red-400">Escala</h3>
+                        <span class="status-badge status-escala">Fase 6</span>
+                    </div>
+                    <p class="text-sm text-gray-400 mb-4">Crescimento exponencial e mercado global</p>
+                    <div class="phase-progress">
+                        <div class="phase-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">0 / 10 itens</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: Criar Nova Startup -->
+    <div class="modal" id="createModal">
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 w-full max-w-md neon-border">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold gradient-text">
+                    <i class="fas fa-star mr-2"></i>Nova Startup
+                </h2>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <form id="createForm" onsubmit="handleCreateStartup(event)">
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">Nome da Startup</label>
+                    <input
+                        type="text"
+                        id="startupName"
+                        required
+                        class="w-full bg-slate-950 border border-green-800/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500 transition"
+                        placeholder="Ex: PixConcilia, Aula-Online..."
+                    >
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold mb-2 text-gray-300">Ideia Bruta</label>
+                    <textarea
+                        id="startupIdeia"
+                        required
+                        rows="4"
+                        class="w-full bg-slate-950 border border-green-800/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500 transition resize-none"
+                        placeholder="Descreva sua ideia: o que resolve, para quem, como..."
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="w-full neon-button">
+                    <i class="fas fa-rocket mr-2"></i>Criar Startup
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script>
+        const SUPABASE_URL = 'https://iwawvsudfukmavfqcsyd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3YXd2c3VkZnVrbWF2ZnFjc3lkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODQ0NjQsImV4cCI6MjA5NDQ2MDQ2NH0.xxxxxxxxxxx'; // Anon key (safe for client)
+
+        // Funções Modal
+        function showCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+        }
+
+        // Criar Startup
+        async function handleCreateStartup(e) {
+            e.preventDefault();
+            const nome = document.getElementById('startupName').value;
+            const ideia = document.getElementById('startupIdeia').value;
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/gratidao_startups`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        ideia_bruta: ideia,
+                        estado: 'IDEIA_RECEBIDA'
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ Startup criada com sucesso!');
+                    closeCreateModal();
+                    document.getElementById('createForm').reset();
+                    loadStartups();
+                } else {
+                    alert('❌ Erro ao criar startup');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro de conexão');
+            }
+        }
+
+        // Carregar Startups
+        async function loadStartups() {
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/gratidao_startups`, {
+                    headers: { 'apikey': SUPABASE_KEY }
+                });
+
+                if (!response.ok) throw new Error('Erro na requisição');
+
+                const startups = await response.json();
+                renderStartups(startups);
+                updateStats(startups);
+            } catch (error) {
+                console.error('Erro:', error);
+                document.getElementById('startupsList').innerHTML = `
+                    <div class="p-6 text-center text-red-400">
+                        <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
+                        <p>Erro ao carregar startups</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Renderizar Startups
+        function renderStartups(startups) {
+            const container = document.getElementById('startupsList');
+
+            if (startups.length === 0) {
+                container.innerHTML = `
+                    <div class="p-12 text-center text-gray-400">
+                        <i class="fas fa-inbox text-4xl mb-4 opacity-30"></i>
+                        <p class="text-lg">Nenhuma startup registrada</p>
+                        <p class="text-sm mt-2">Clique em "Nova Startup" para começar</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = startups.map(startup => `
+                <div class="startup-item" onclick="viewStartup('${startup.id}')">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg text-white">${startup.nome}</h3>
+                            <p class="text-sm text-gray-400 mt-1">${startup.ideia_bruta.substring(0, 80)}...</p>
+                        </div>
+                        <span class="status-badge status-${getStatusClass(startup.estado)}">
+                            ${formatEstado(startup.estado)}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-gray-500">
+                        <span><i class="fas fa-calendar mr-1"></i>${formatDate(startup.created_at)}</span>
+                        <span class="text-green-500"><i class="fas fa-arrow-right mr-1"></i>Ver detalhes</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Atualizar Estatísticas
+        function updateStats(startups) {
+            const stats = {
+                active: startups.length,
+                validation: startups.filter(s => s.estado.includes('FASE_1')).length,
+                progressed: startups.filter(s => s.estado.includes('FASE_') && !s.estado.includes('FASE_1')).length,
+                rejected: startups.filter(s => s.estado === 'IDEIA_REJEITADA').length
+            };
+
+            document.getElementById('activeCount').textContent = stats.active;
+            document.getElementById('validationCount').textContent = stats.validation;
+            document.getElementById('progressedCount').textContent = stats.progressed;
+            document.getElementById('rejectedCount').textContent = stats.rejected;
+        }
+
+        // Funções Auxiliares
+        function getStatusClass(estado) {
+            if (estado.includes('FASE_1')) return 'validacao';
+            if (estado.includes('FASE_2')) return 'compartilhamento';
+            if (estado.includes('FASE_3')) return 'retencao';
+            if (estado.includes('FASE_4')) return 'trafego';
+            if (estado.includes('FASE_5')) return 'conversao';
+            if (estado.includes('FASE_6')) return 'escala';
+            return 'validacao';
+        }
+
+        function formatEstado(estado) {
+            const map = {
+                'IDEIA_RECEBIDA': '📝 Ideia',
+                'CANVAS_GERADO': '🎨 Canvas',
+                'IDEIA_REJEITADA': '❌ Rejeitada',
+                'FASE_1_VALIDACAO': '✓ Validação',
+                'FASE_2_SHARE': '📢 Compartilhamento',
+                'FASE_3_RETENCAO': '📌 Retenção',
+                'FASE_4_TRAFEGO': '📈 Distribuição',
+                'FASE_5_CONVERSAO': '💰 Otimização',
+                'FASE_6_ESCALA': '🚀 Escala'
+            };
+            return map[estado] || estado;
+        }
+
+        function formatDate(date) {
+            return new Date(date).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit'
+            });
+        }
+
+        function viewStartup(id) {
+            alert(`Ver detalhes da startup: ${id}\n\n(Em construção)`);
+        }
+
+        // Carregar dados ao iniciar
+        loadStartups();
+
+        // Atualizar a cada 30 segundos
+        setInterval(loadStartups, 30000);
+
+        // Fechar modal ao clicar fora
+        document.getElementById('createModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCreateModal();
+        });
+    </script>
+</body>
+</html>
